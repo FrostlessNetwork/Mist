@@ -1,5 +1,3 @@
-import org.gradle.kotlin.dsl.support.compileKotlinScriptModuleTo
-
 plugins {
     java
     id("io.freefair.lombok") version "6.3.0"
@@ -45,7 +43,7 @@ dependencies {
     // FrostCore
     implementation("network.frostless:frostcore:0.0.1")
     implementation("org.spongepowered:configurate-yaml:4.1.2")
-
+    implementation("io.lettuce:lettuce-core:6.1.6.RELEASE")
 
     // LogSnag
     implementation("cc.ricecx:logsnag4j:1.1")

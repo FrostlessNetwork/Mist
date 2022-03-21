@@ -12,4 +12,6 @@ public class MistConfigModel {
 
     private AutoRoleModel autoRole = new AutoRoleModel();
 
+    private RedisModel redis;
+
 }

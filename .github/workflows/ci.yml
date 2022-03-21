@@ -1,0 +1,22 @@
+on:
+  push:
+    branches:
+      - master
+    pull_requests:
+      branches:
+        - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Grant Permissions to gradlew
+        run: chmod +x gradlew
+      - name: Build with Gradle
+        run: ./gradlew build
