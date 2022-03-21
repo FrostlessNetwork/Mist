@@ -1,22 +1,24 @@
 package network.frostless.mist.config.model;
 
 import lombok.Data;
-import lombok.Getter;
 import network.frostless.frostcore.messaging.redis.RedisCredentials;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
-@Getter
 @Data
+@ConfigSerializable
 public class RedisModel {
 
-    private final String host;
-    private final int port;
+    private String host;
+    private int port;
 
     @Nullable
-    private final String password;
+    private String password;
 
-    private final Integer database;
+    private Integer database;
 
+
+    RedisModel() { }
 
     public RedisCredentials get() {
         return new RedisCredentials(host, port, password, database);

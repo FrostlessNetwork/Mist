@@ -74,6 +74,8 @@ public class CommandService implements EventableService {
 
             guild.upsertCommand(commandData).flatMap(cmd -> cmd.updatePrivileges(guild, command.getPermissionMapper().apply(cmd))).queue((c) -> logger.info("Registered command {}", command.getName()));
         }
+
+        logger.info("Registered {} commands", commands.size());
     }
 
     private void updateCommandPrivileges(Command command) {
