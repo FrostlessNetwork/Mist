@@ -1,0 +1,11 @@
+.gradle/
+.idea/
+build/
+output/
+target/
+out/
+classes/
+class/
+testing/
+
+*.env

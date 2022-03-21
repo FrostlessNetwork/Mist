@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Configuration status="warn">
+    <!-- Available loggers -->
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="TerminalConsole" />
+        </Root>
+    </Loggers>
+    <!-- Available appenders (Basically how to output logs) -->
+    <Appenders>
+        <!-- Console output -->
+        <TerminalConsole name="TerminalConsole">
+            <PatternLayout>
+                <LoggerNamePatternSelector
+                        defaultPattern="%highlightError{[%d{HH:mm:ss} %level] [%logger]: %minecraftFormatting{%msg}%n%xEx}">
+                </LoggerNamePatternSelector>
+            </PatternLayout>
+        </TerminalConsole>
+    </Appenders>
+</Configuration>

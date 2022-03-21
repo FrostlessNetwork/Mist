@@ -1,0 +1,7 @@
+[submodule "libs/FrostCore"]
+	path = libs/FrostCore
+	url = git@github.com:FrostlessNetwork/FrostCore.git
+	branch = master
+[submodule "libs/ServerAPI"]
+	path = libs/ServerAPI
+	url = git@github.com:FrostlessNetwork/ServerAPI.git
