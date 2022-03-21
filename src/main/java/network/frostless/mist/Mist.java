@@ -13,7 +13,7 @@ import network.frostless.frostcore.messaging.redis.Redis;
 import network.frostless.frostcore.messaging.redis.impl.DefaultRedisProvider;
 import network.frostless.mist.commands.HelloWorldCommand;
 import network.frostless.mist.commands.autorole.AutoRoleCommand;
-import network.frostless.mist.commands.server.HelpCommand;
+import network.frostless.mist.commands.HelpCommand;
 import network.frostless.mist.commands.server.PlayerCountCommand;
 import network.frostless.mist.commands.server.ServerIPCommand;
 import network.frostless.mist.commands.server.link.LinkCommand;

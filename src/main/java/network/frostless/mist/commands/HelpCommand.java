@@ -1,4 +1,4 @@
-package network.frostless.mist.commands.server;
+package network.frostless.mist.commands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -11,6 +11,7 @@ import network.frostless.mist.services.command.CommandService;
 
 import java.lang.reflect.Method;
 import java.time.Instant;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,12 +19,14 @@ import java.util.Optional;
 public class HelpCommand extends CommandBase {
 
     private final CommandService service;
+
     public HelpCommand() {
         Optional<CommandService> service = ServiceManager.get().getService(CommandService.class);
         this.service = service.orElseThrow(() -> {
             throw new IllegalStateException("CommandService not found!");
         });
     }
+
     @Default
     public void onDefault(SlashCommandEvent event) {
         EmbedBuilder embed = new EmbedBuilder();
@@ -56,10 +59,16 @@ public class HelpCommand extends CommandBase {
 
         StringBuilder builder = new StringBuilder();
 
-        for (Param parameter : parameters) {
-            if(parameter.required()) {
-                builder.append(String.format("<%s>", parameter.name()));
-            }
+        Iterator<Param> iterator = parameters.iterator();
+
+        // We use an iterator, so we can check if there is another
+        // parameter to append a space after the parameter unless it ends.
+        while (iterator.hasNext()) {
+            Param next = iterator.next();
+
+            if (next.required()) builder.append(String.format("<%s>", next.name()));
+
+            if (iterator.hasNext()) builder.append(" ");
         }
 
         return builder.toString();
