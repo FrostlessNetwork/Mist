@@ -125,7 +125,10 @@ public class CommandBase {
         for (int i = 0; i < parameters.size(); i++) {
             OptionMapping option = evt.getOption(parameters.get(i).name());
 
-            if (option == null) args[i + 1] = null;
+            if (option == null) {
+                args[i + 1] = null;
+                return;
+            }
 
             OptionMap resolvedOption = OptionMap.as(parameters.get(i).type());
 
@@ -136,6 +139,9 @@ public class CommandBase {
             }
         }
 
+        for (Object arg : args) {
+            System.out.println(arg.getClass().getTypeName());
+        }
         method.invoke(this, args);
     }
 

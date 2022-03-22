@@ -14,6 +14,7 @@ import network.frostless.frostcore.messaging.redis.impl.DefaultRedisProvider;
 import network.frostless.mist.commands.HelloWorldCommand;
 import network.frostless.mist.commands.autorole.AutoRoleCommand;
 import network.frostless.mist.commands.HelpCommand;
+import network.frostless.mist.commands.discord.UserInfoCommand;
 import network.frostless.mist.commands.server.PlayerCountCommand;
 import network.frostless.mist.commands.server.ServerIPCommand;
 import network.frostless.mist.commands.server.link.LinkCommand;
@@ -33,6 +34,7 @@ public class Mist extends DiscordBot {
 
     private final Logger logger = LogManager.getLogger("Mist");
 
+    private static Mist instance;
     private final MistConfig config = Application.config;
     private final Redis<String, String> redis;
     private final LogSnag logSnag;
@@ -45,6 +47,7 @@ public class Mist extends DiscordBot {
      */
     public Mist() {
         super();
+        instance = this;
         logSnag = new LogSnagClient(System.getenv("LOGSNAG_KEY"), "frostless-mist");
         redis = new DefaultRedisProvider(config.get().getRedis().get());
 
@@ -60,8 +63,9 @@ public class Mist extends DiscordBot {
                 new HelpCommand(),
                 new LinkCommand(),
                 new ServerIPCommand(),
-                new PlayerCountCommand(),
-                new AutoRoleCommand()
+                new PlayerCountCommand(redis),
+                new AutoRoleCommand(),
+                new UserInfoCommand()
         );
     }
 
@@ -88,5 +92,9 @@ public class Mist extends DiscordBot {
                 OnlineStatus.ONLINE,
                 Activity.of(Activity.ActivityType.WATCHING, "for help!")
         );
+    }
+
+    public static Mist get() {
+        return instance;
     }
 }

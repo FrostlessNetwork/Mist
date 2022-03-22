@@ -44,6 +44,9 @@ dependencies {
     implementation("network.frostless:frostcore:0.0.1")
     implementation("org.spongepowered:configurate-yaml:4.1.2")
     implementation("io.lettuce:lettuce-core:6.1.6.RELEASE")
+    
+    // Server API
+    implementation("network.frostless:ServerAPI:0.0.1")
 
     // LogSnag
     implementation("cc.ricecx:logsnag4j:1.1")
