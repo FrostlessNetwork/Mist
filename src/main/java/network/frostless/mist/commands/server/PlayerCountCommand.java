@@ -2,6 +2,7 @@ package network.frostless.mist.commands.server;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.Interaction;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import network.frostless.frostcore.messaging.redis.Redis;
 import network.frostless.mist.Mist;
@@ -25,14 +26,10 @@ public class PlayerCountCommand extends CommandBase {
 
     @Default
     public void onCommand(SlashCommandEvent event) {
-
-        event.getInteraction().deferReply().queue();
-
-        InteractionHook hook = event.getInteraction().getHook();
-
+        Interaction interaction = event.getInteraction();
+        interaction.deferReply().queue();
 
         String totalPlayers = redis.sync().get(RedisKeys.TOTAL_PLAYERS);
-
 
         int players = totalPlayers != null ? Integer.parseInt(totalPlayers) : 0;
 
@@ -45,6 +42,6 @@ public class PlayerCountCommand extends CommandBase {
         embed.setTimestamp(Instant.now());
         embed.setFooter("Frostless Network", "https://imgur.com/TkerXsa.png");
 
-        hook.sendMessageEmbeds(embed.build()).queue();
+        interaction.getHook().sendMessageEmbeds(embed.build()).queue();
     }
 }
