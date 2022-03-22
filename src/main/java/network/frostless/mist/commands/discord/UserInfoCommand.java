@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 import network.frostless.fragment.utils.EmojiUtils;
 import network.frostless.fragment.utils.TimeUtils;
 import network.frostless.mist.core.command.CommandBase;
@@ -21,7 +22,7 @@ public class UserInfoCommand extends CommandBase {
     @Default
     public void execute(
             SlashCommandEvent evt,
-            @Param(name = "member", description = "A member to look up information on") Member member
+            @Param(name = "member", description = "A member to look up information on", type = OptionType.MENTIONABLE) Member member
             ) {
         EmbedBuilder embed = new EmbedBuilder();
         final Member effectiveMember = member == null ? evt.getMember() : member;
