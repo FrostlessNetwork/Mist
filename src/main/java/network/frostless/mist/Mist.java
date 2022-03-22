@@ -3,6 +3,7 @@ package network.frostless.mist;
 import cc.ricecx.logsnag4j.Emoji;
 import cc.ricecx.logsnag4j.LogSnagClient;
 import cc.ricecx.logsnag4j.api.LogSnag;
+import lombok.Getter;
 import net.dv8tion.jda.api.JDAInfo;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
@@ -15,6 +16,8 @@ import network.frostless.mist.commands.HelloWorldCommand;
 import network.frostless.mist.commands.autorole.AutoRoleCommand;
 import network.frostless.mist.commands.HelpCommand;
 import network.frostless.mist.commands.discord.UserInfoCommand;
+import network.frostless.mist.commands.game.tictactoe.TicTacToeCommand;
+import network.frostless.mist.commands.game.tictactoe.core.TicTacToeManager;
 import network.frostless.mist.commands.server.PlayerCountCommand;
 import network.frostless.mist.commands.server.ServerIPCommand;
 import network.frostless.mist.commands.server.link.LinkCommand;
@@ -30,11 +33,13 @@ import org.apache.logging.log4j.Logger;
 /**
  * The main Bot class
  */
+@Getter
 public class Mist extends DiscordBot {
 
     private final Logger logger = LogManager.getLogger("Mist");
 
     private static Mist instance;
+
     private final MistConfig config = Application.config;
     private final Redis<String, String> redis;
     private final LogSnag logSnag;
@@ -55,7 +60,8 @@ public class Mist extends DiscordBot {
         registerService(
                 commandService,
                 new InviteTrackingService(),
-                new AutoRoleService()
+                new AutoRoleService(),
+                new TicTacToeManager()
         );
 
         commandService.addCommand(
@@ -65,7 +71,9 @@ public class Mist extends DiscordBot {
                 new ServerIPCommand(),
                 new PlayerCountCommand(redis),
                 new AutoRoleCommand(),
-                new UserInfoCommand()
+                new UserInfoCommand(),
+                // Games
+                new TicTacToeCommand()
         );
     }
 

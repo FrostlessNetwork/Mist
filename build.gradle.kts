@@ -44,7 +44,11 @@ dependencies {
     implementation("network.frostless:frostcore:0.0.1")
     implementation("org.spongepowered:configurate-yaml:4.1.2")
     implementation("io.lettuce:lettuce-core:6.1.6.RELEASE")
-    
+    // ORM
+    implementation("com.j256.ormlite:ormlite-core:6.1")
+    implementation("com.j256.ormlite:ormlite-jdbc:6.1")
+
+
     // Server API
     implementation("network.frostless:ServerAPI:0.0.1")
 
