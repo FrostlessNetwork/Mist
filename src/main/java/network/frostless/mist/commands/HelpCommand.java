@@ -2,6 +2,7 @@ package network.frostless.mist.commands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import network.frostless.fragment.utils.Permissions;
 import network.frostless.mist.core.command.CommandBase;
 import network.frostless.mist.core.command.annotations.Command;
 import network.frostless.mist.core.command.annotations.Default;
@@ -35,6 +36,8 @@ public class HelpCommand extends CommandBase {
         builder.append("**List of commands:** 📚").append("\n");
 
         for (CommandBase command : service.getCommands().values()) {
+
+            if(command.getPermissionMapper().apply(null).size() != 0 && !Permissions.hasPermission(command, event.getUser())) continue;
 
             builder
                     .append(":white_medium_small_square: ")
