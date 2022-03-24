@@ -1,6 +1,11 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar as ShadowJar
+
+
 plugins {
     java
+    application
     id("io.freefair.lombok") version "6.3.0"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
 group = "network.frostless"
@@ -9,6 +14,7 @@ version = "0.0.1"
 
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+    withSourcesJar()
 }
 
 var log4jVersion = "2.17.1"
@@ -17,6 +23,10 @@ repositories {
     mavenCentral()
 
     maven("https://m2.dv8tion.net/releases")
+}
+
+application {
+    mainClass.set("network.frostless.mist.Application")
 }
 
 dependencies {
@@ -56,6 +66,19 @@ dependencies {
     implementation("cc.ricecx:logsnag4j:1.1")
 }
 
+// Configure Shadow to output with normal jar file name:
+tasks.named<ShadowJar>("shadowJar").configure {
+    minimize()
+    archiveFileName.set("${project.rootProject.name}-${project.name}-v${project.version}.jar")
+    destinationDirectory.set(file("$rootDir/output"))
+}
+
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
+}
+
+tasks {
+    build {
+        dependsOn(shadowJar)
+    }
 }
