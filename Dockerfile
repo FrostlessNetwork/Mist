@@ -1,4 +1,4 @@
-FROM gradle:6.9-jdk17-alpine AS build
+FROM eclipse-temurin:17.0.2_8-jdk-alpine AS build
 COPY --chown=grald:gradle . /home/gradle/src
 WORKDIR /home/gradle/src
 RUN gradle build --no-daemon
