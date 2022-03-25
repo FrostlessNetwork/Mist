@@ -11,6 +11,7 @@ public class Application {
 
     public static MistConfig config;
 
+
     static {
         System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
     }
