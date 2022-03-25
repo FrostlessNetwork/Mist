@@ -1,7 +1,7 @@
 FROM arm64v8/eclipse-temurin:17 AS build
-COPY --chown=gradle:nogroup . /home/gradle/src
-WORKDIR /home/gradle/src
-USER gradle
+COPY --chown=nobody:nogroup . /home/gradle/src
+WORKDIR /home/nobody/src
+USER nobody
 RUN ./gradlew build --no-daemon
 
 FROM arm64v8/eclipse-temurin:17
