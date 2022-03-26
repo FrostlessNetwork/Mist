@@ -1,21 +1,33 @@
 package network.frostless.mist.services.autorole;
 
 import net.dv8tion.jda.api.entities.Emoji;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.events.interaction.SelectionMenuEvent;
+import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
+import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.interactions.components.ComponentLayout;
+import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
+import net.dv8tion.jda.api.interactions.components.selections.SelectionMenu;
 import network.frostless.mist.Application;
+import network.frostless.mist.Mist;
 import network.frostless.mist.config.MistConfig;
+import network.frostless.mist.config.model.AutoRoleModel;
+import network.frostless.mist.config.model.SelectOptionModel;
+import network.frostless.mist.config.model.SelectReactionModel;
 import network.frostless.mist.core.service.impl.EventableService;
 import network.frostless.mist.services.autorole.model.ButtonModel;
 import network.frostless.mist.services.autorole.model.EmojiModel;
 import org.spongepowered.configurate.ConfigurateException;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class AutoRoleService implements EventableService {
 
@@ -64,6 +76,18 @@ public class AutoRoleService implements EventableService {
         }
     }
 
+    public SelectionMenu getRolesAsSelection(String customId) {
+        AutoRoleModel autoRole = config.get().getAutoRole();
+        List<SelectOption> collect = autoRole.getSelectOptions().get(customId).stream().map(SelectOptionModel::to).collect(Collectors.toList());
+
+        SelectionMenu.Builder builder = SelectionMenu.create("autorole-" + customId);
+        builder.addOptions(collect);
+        builder.setMinValues(0);
+        builder.setMaxValues(collect.size());
+
+        return builder.build();
+    }
+
     public List<ComponentLayout> getAutoRoleComponents(String id) {
         return autoRoles.get(id);
     }
@@ -77,6 +101,80 @@ public class AutoRoleService implements EventableService {
         }
 
         return btn;
+    }
+
+    @SubscribeEvent
+    public void onChooseSelection(SelectionMenuEvent event) {
+        if(!event.getComponentId().startsWith("autorole-")) return;
+
+        event.deferReply(true).queue();
+
+        InteractionHook hook = event.getHook();
+
+        String roleIdentifier = event.getComponentId().split("autorole-")[1];
+        List<SelectOptionModel> configuredRoles = config.get().getAutoRole().getSelectOptions().get(roleIdentifier);
+        if (configuredRoles == null) {
+            hook.editOriginal("No roles configured for this selection menu.").queue();
+            return;
+        }
+        Member member = event.getMember();
+        if (member == null) {
+            hook.editOriginal("You must be a member to use this selection menu.").queue();
+            return;
+        }
+
+        List<Map.Entry<Role, Boolean>> rolesTheyWant = configuredRoles
+                .stream()
+                .map(r -> {
+                    Role roleById = member.getGuild().getRoleById(r.getRole());
+                    if (roleById == null) return null;
+                    return event.getValues().contains(r.getValue()) ? Map.entry(roleById, true) : Map.entry(roleById, false);
+                }).toList();
+
+        for (Map.Entry<Role, Boolean> rolesToChange : rolesTheyWant) {
+            if (rolesToChange.getValue() && !member.getRoles().contains(rolesToChange.getKey())) {
+                // Add to user
+                member.getGuild().addRoleToMember(member, rolesToChange.getKey()).queue();
+            } else if (!rolesToChange.getValue()) {
+                // remove this
+                member.getGuild().removeRoleFromMember(member, rolesToChange.getKey()).queue();
+            }
+        }
+
+        event.getHook().sendMessage("Your roles have been updated!").setEphemeral(true).queue();
+    }
+
+
+    @SubscribeEvent
+    public void onReact(GuildMessageReactionAddEvent evt) {
+        if (evt.getUser().isBot()) return;
+
+        getReaction(evt.getMessageId(), evt.getReactionEmote()).ifPresent(r -> {
+            Role roleById = evt.getJDA().getRoleById(r.getKey());
+            if (roleById == null) return;
+            evt.getGuild().addRoleToMember(evt.getMember(), roleById).queue();
+        });
+    }
+
+    @SubscribeEvent
+    public void onUnReact(GuildMessageReactionRemoveEvent evt) {
+        if (evt.getUser().isBot()) return;
+
+        if (evt.getMember() == null) return;
+
+        getReaction(evt.getMessageId(), evt.getReactionEmote()).ifPresent(r -> {
+            Role roleById = evt.getJDA().getRoleById(r.getKey());
+            if (roleById == null) return;
+            evt.getGuild().removeRoleFromMember(evt.getMember(), roleById).queue();
+        });
+    }
+
+    private Optional<Map.Entry<String, EmojiModel>> getReaction(String messageId, MessageReaction.ReactionEmote emote) {
+        Map<String, EmojiModel> emoji = Mist.get().getConfig().get().getAutoRole().getSelectReactions().get(messageId);
+
+        if (emoji == null) return Optional.empty();
+
+        return emoji.entrySet().stream().filter(e -> e.getValue().getIcon().equals(emote.getEmoji())).findFirst();
     }
 
     @SubscribeEvent

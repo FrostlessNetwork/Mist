@@ -9,4 +9,7 @@ RUN mkdir /app
 COPY --from=build /home/gradle/src/output/*.jar /app/Mist.jar
 COPY --from=build /home/gradle/src/src/main/resources/log4j2.xml /app/log4j2.xml
 
+WORKDIR /app
+VOLUME ["/app"]
+
 ENTRYPOINT ["java", "-jar", "-Dlog4j.configurationFile=/app/log4j2.xml", "/app/Mist.jar"]

@@ -3,7 +3,19 @@ version: "3.9"
 services:
   mist:
     build: .
+    container_name: frostless-mist
     env_file:
       - .env
     volumes:
       - ./data:/data
+  database:
+    image: postgres:14-alpine
+    container_name: frostless-database
+    env_file:
+      - .env
+  adminer:
+    image: adminer
+    container_name: frostless-adminer
+    restart: always
+    ports:
+      - "9009:8080"

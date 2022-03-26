@@ -73,7 +73,7 @@ public class InviteTrackingService implements EventableService {
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("New Member!");
         embed.setDescription(String.format("%s (%s) joined with invite code %s", joiner.getUser().getAsMention(), joiner.getUser().getId(), invite == null ? "None" : invite.getCode()));
-        embed.setFooter(String.format("This invite now has **%s** uses", invite == null ? "0" : String.valueOf(invite.getUses())));
+        embed.setFooter(String.format("This invite now has %s uses", invite == null ? "0" : String.valueOf(invite.getUses())));
         embed.setColor(0x42f5b6);
         embed.setTimestamp(Instant.now());
 

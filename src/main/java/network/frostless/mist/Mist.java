@@ -10,11 +10,15 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.SelfUser;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
+import network.frostless.fragment.database.DatabaseManager;
 import network.frostless.frostcore.messaging.redis.Redis;
 import network.frostless.frostcore.messaging.redis.impl.DefaultRedisProvider;
 import network.frostless.mist.commands.HelloWorldCommand;
+import network.frostless.mist.commands.admin.EditMessageCommand;
+import network.frostless.mist.commands.admin.RawMessageCommand;
 import network.frostless.mist.commands.autorole.AutoRoleCommand;
 import network.frostless.mist.commands.HelpCommand;
+import network.frostless.mist.commands.discord.GuildInfoCommand;
 import network.frostless.mist.commands.discord.UserInfoCommand;
 import network.frostless.mist.commands.game.tictactoe.TicTacToeCommand;
 import network.frostless.mist.commands.game.tictactoe.core.TicTacToeManager;
@@ -27,6 +31,7 @@ import network.frostless.mist.core.session.DiscordSessionControllerImpl;
 import network.frostless.mist.services.autorole.AutoRoleService;
 import network.frostless.mist.services.command.CommandService;
 import network.frostless.mist.services.invitetracking.InviteTrackingService;
+import network.frostless.mist.services.testing.TestingService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -46,6 +51,8 @@ public class Mist extends DiscordBot {
 
     private final CommandService commandService;
 
+    private DatabaseManager database;
+
     /**
      * Instantiates a {@link Mist} bot and
      * initializes all of its services and commands.
@@ -61,7 +68,8 @@ public class Mist extends DiscordBot {
                 commandService,
                 new InviteTrackingService(),
                 new AutoRoleService(),
-                new TicTacToeManager()
+                new TicTacToeManager(),
+                new TestingService()
         );
 
         commandService.addCommand(
@@ -72,6 +80,9 @@ public class Mist extends DiscordBot {
                 new PlayerCountCommand(redis),
                 new AutoRoleCommand(),
                 new UserInfoCommand(),
+                new GuildInfoCommand(),
+                new EditMessageCommand(),
+                new RawMessageCommand(),
                 // Games
                 new TicTacToeCommand()
         );
