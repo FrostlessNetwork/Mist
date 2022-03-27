@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
 import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
+import network.frostless.mist.Application;
 import network.frostless.mist.core.command.CommandBase;
 import network.frostless.mist.core.command.annotations.Param;
 import network.frostless.mist.core.command.annotations.SubCommand;
@@ -77,7 +78,7 @@ public class CommandService implements EventableService {
             waitToRegister.add(commandData);
         }
 
-        Guild guild = getJDA().getGuildById(945581170157051914L);
+        Guild guild = getJDA().getGuildById(Application.config.get().getGuildId());
         if (guild == null) throw new RuntimeException("Guild not found");
 
         CommandListUpdateAction action = guild.updateCommands().addCommands(waitToRegister);
