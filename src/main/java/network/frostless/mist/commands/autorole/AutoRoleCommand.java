@@ -21,6 +21,7 @@ import network.frostless.mist.services.autorole.AutoRoleService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 @Command("autorole")
 public class AutoRoleCommand extends CommandBase {
@@ -58,9 +59,9 @@ public class AutoRoleCommand extends CommandBase {
     }
 
     @Override
-    public Function<net.dv8tion.jda.api.interactions.commands.Command, List<CommandPrivilege>> getPermissionMapper() {
+    public Supplier<List<CommandPrivilege>> getPermissionMapper() {
 
-        return (cmd) -> {
+        return () -> {
            final List<CommandPrivilege> list = new ArrayList<>();
 
             for (String allowedAdmin : config.get().getAutoRole().getAllowedAdmins()) {

@@ -16,6 +16,7 @@ import network.frostless.frostcore.messaging.redis.impl.DefaultRedisProvider;
 import network.frostless.mist.commands.HelloWorldCommand;
 import network.frostless.mist.commands.admin.EditMessageCommand;
 import network.frostless.mist.commands.admin.RawMessageCommand;
+import network.frostless.mist.commands.admin.SendMessageCommand;
 import network.frostless.mist.commands.autorole.AutoRoleCommand;
 import network.frostless.mist.commands.HelpCommand;
 import network.frostless.mist.commands.discord.GuildInfoCommand;
@@ -25,15 +26,20 @@ import network.frostless.mist.commands.game.tictactoe.core.TicTacToeManager;
 import network.frostless.mist.commands.server.PlayerCountCommand;
 import network.frostless.mist.commands.server.ServerIPCommand;
 import network.frostless.mist.commands.server.link.LinkCommand;
+import network.frostless.mist.commands.voting.PollCommand;
 import network.frostless.mist.config.MistConfig;
 import network.frostless.mist.core.DiscordBot;
 import network.frostless.mist.core.session.DiscordSessionControllerImpl;
 import network.frostless.mist.services.autorole.AutoRoleService;
 import network.frostless.mist.services.command.CommandService;
 import network.frostless.mist.services.invitetracking.InviteTrackingService;
+import network.frostless.mist.services.polling.PollingService;
 import network.frostless.mist.services.testing.TestingService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.net.http.HttpClient;
+import java.time.Duration;
 
 /**
  * The main Bot class
@@ -50,6 +56,12 @@ public class Mist extends DiscordBot {
     private final LogSnag logSnag;
 
     private final CommandService commandService;
+
+    private final HttpClient httpClient = HttpClient
+            .newBuilder()
+            .connectTimeout(Duration.ofSeconds(30))
+            .build();
+
 
     private DatabaseManager database;
 
@@ -69,6 +81,7 @@ public class Mist extends DiscordBot {
                 new InviteTrackingService(),
                 new AutoRoleService(),
                 new TicTacToeManager(),
+                new PollingService(),
                 new TestingService()
         );
 
@@ -83,8 +96,10 @@ public class Mist extends DiscordBot {
                 new GuildInfoCommand(),
                 new EditMessageCommand(),
                 new RawMessageCommand(),
+                new SendMessageCommand(),
                 // Games
-                new TicTacToeCommand()
+                new TicTacToeCommand(),
+                new PollCommand()
         );
     }
 

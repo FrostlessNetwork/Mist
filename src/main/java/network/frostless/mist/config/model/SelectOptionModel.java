@@ -2,7 +2,7 @@ package network.frostless.mist.config.model;
 
 import lombok.Data;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
-import network.frostless.mist.services.autorole.model.EmojiModel;
+import network.frostless.mist.config.model.common.EmojiModel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;

@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
 import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
+import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import network.frostless.mist.core.command.CommandBase;
 import network.frostless.mist.core.command.annotations.Param;
 import network.frostless.mist.core.command.annotations.SubCommand;
@@ -20,6 +21,8 @@ import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -32,19 +35,22 @@ public class CommandService implements EventableService {
     private final Map<String, CommandBase> commands = Maps.newConcurrentMap();
 
 
-    public void addCommand(CommandBase ...commands) {
-        for(CommandBase command : commands) {
+    public void addCommand(CommandBase... commands) {
+        for (CommandBase command : commands) {
             this.commands.put(command.getName(), command);
         }
     }
 
     public void registerCommands() {
-        for(CommandBase command : commands.values()) {
+
+        List<CommandData> waitToRegister = new ArrayList<>();
+
+        for (CommandBase command : commands.values()) {
             CommandData commandData = new CommandData(command.getName(), command.getDescription());
 
-            if(command.defaultHasParams()) {
-                for(Parameter param : command.getDefaultMethod().getParameters()) {
-                    if(param.isAnnotationPresent(Param.class)) {
+            if (command.defaultHasParams()) {
+                for (Parameter param : command.getDefaultMethod().getParameters()) {
+                    if (param.isAnnotationPresent(Param.class)) {
                         Param annotation = param.getAnnotation(Param.class);
                         commandData.addOption(annotation.type(), annotation.name(), annotation.description(), annotation.required());
                     }
@@ -55,8 +61,9 @@ public class CommandService implements EventableService {
                 SubcommandData subcommandData = new SubcommandData(sc.getKey().value(), sc.getKey().description());
 
                 for (Parameter parameter : sc.getValue().getParameters()) {
-                    if(parameter.isAnnotationPresent(Param.class)) {
+                    if (parameter.isAnnotationPresent(Param.class)) {
                         Param annotation = parameter.getAnnotation(Param.class);
+                        System.out.println(annotation);
                         subcommandData.addOption(annotation.type(), annotation.name(), annotation.description(), annotation.required());
                     }
                 }
@@ -64,29 +71,34 @@ public class CommandService implements EventableService {
                 commandData.addSubcommands(subcommandData);
             }
 
-            for (SubcommandGroupData subCommandGroup : command.getSubCommandGroups()) {
-                commandData.addSubcommandGroups(subCommandGroup);
-            }
+//            for (SubcommandGroupData subCommandGroup : command.getSubCommandGroups()) {
+//                commandData.addSubcommandGroups(subCommandGroup);
+//            }
 
-
-            Guild guild = getJDA().getGuildById(945581170157051914L);
-            if(guild == null) throw new RuntimeException("Guild not found");
-
-            guild.upsertCommand(commandData).flatMap(cmd -> cmd.updatePrivileges(guild, command.getPermissionMapper().apply(cmd))).queue((c) -> logger.info("Registered command {}", command.getName()));
+            waitToRegister.add(commandData);
         }
 
-        logger.info("Registered {} commands", commands.size());
-    }
+        Guild guild = getJDA().getGuildById(945581170157051914L);
+        if (guild == null) throw new RuntimeException("Guild not found");
 
-    private void updateCommandPrivileges(Command command) {
+        CommandListUpdateAction action = guild.updateCommands().addCommands(waitToRegister);
 
+        action.queue((v) -> {
+            logger.info("Registered {} commands", v.size());
+            Map<String, Collection<? extends CommandPrivilege>> privileges = Maps.newHashMap();
+            for (Command command : v) {
+                privileges.put(command.getId(), commands.get(command.getName()).getPermissionMapper().get());
+            }
+            guild.updateCommandPrivileges(privileges).queue((c) -> logger.info("Updated {} privileges", c.size()));
+
+        });
     }
 
     @SubscribeEvent
     public void onSlash(SlashCommandEvent event) {
         boolean hasSubCommand = event.getCommandPath().contains("/");
 
-        if(!hasSubCommand && commands.containsKey(event.getCommandPath())) {
+        if (!hasSubCommand && commands.containsKey(event.getCommandPath())) {
             commands.get(event.getCommandPath()).executeDefault(event);
         } else {
             // get subcommand

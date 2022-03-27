@@ -9,10 +9,10 @@ import java.util.List;
 public class Permissions {
 
     public static boolean hasPermission(final CommandBase command, final User user) {
-        List<CommandPrivilege> privs = command.getPermissionMapper().apply(null);
+        List<CommandPrivilege> privs = command.getPermissionMapper().get();
 
         for (CommandPrivilege priv : privs) {
-            if(priv.getType().equals(CommandPrivilege.Type.USER) && priv.getId().equals(user.getId())) {
+            if (priv.getType().equals(CommandPrivilege.Type.USER) && priv.getId().equals(user.getId())) {
                 return priv.isEnabled();
             }
         }

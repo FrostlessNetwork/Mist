@@ -11,7 +11,8 @@ import network.frostless.mist.config.model.SelectOptionModel;
 import network.frostless.mist.core.service.impl.EventableService;
 import network.frostless.mist.services.ServiceManager;
 import network.frostless.mist.services.autorole.AutoRoleService;
-import network.frostless.mist.services.autorole.model.EmojiModel;
+import network.frostless.mist.config.model.common.EmojiModel;
+import network.frostless.mist.services.polling.PollingService;
 
 import java.time.Instant;
 import java.util.Map;
@@ -23,24 +24,50 @@ public class TestingService implements EventableService {
     public void onMessage(MessageReceivedEvent evt) {
         if (!evt.getAuthor().getId().equalsIgnoreCase("201825529333153792")) return;
 
-        if(evt.getMessage().getContentRaw().startsWith("!rolesEmbed")) {
+        if (evt.getMessage().getContentRaw().startsWith("!rolesEmbed")) {
             String s = evt.getMessage().getContentRaw().split(" ")[1];
             evt.getChannel().sendMessage(generateRolesEmbed(s)).queue();
-        } else if(evt.getMessage().getContentRaw().startsWith("!addReactions")) {
+        } else if (evt.getMessage().getContentRaw().startsWith("!addReactions")) {
             String s = evt.getMessage().getContentRaw().split(" ")[1];
-            if(s == null) return;
+            if (s == null) return;
             evt.getChannel().retrieveMessageById(s).queue(this::addReactions);
+        } else if (evt.getMessage().getContentRaw().startsWith("!vote")) {
+            String s = evt.getMessage().getContentRaw().split(" ")[1];
+            if (s == null) return;
+            evt.getChannel().sendMessage(createVote(s)).queue();
+        } else if (evt.getMessage().getContentRaw().startsWith("!vres")) {
+            String s = evt.getMessage().getContentRaw().split(" ")[1];
+            if (s == null) return;
+            evt.getChannel().sendMessage(getVotes(s)).queue();
         }
+    }
+
+    private Message getVotes(String id) {
+        MessageBuilder builder = new MessageBuilder();
+
+        ServiceManager.get(PollingService.class).ifPresent(poll -> poll.getVotesFor(id).forEach((k, v) -> builder.append(k).append(": ").append(String.valueOf(v)).append("\n")));
+
+        return builder.build();
+    }
+
+    private Message createVote(String id) {
+        MessageBuilder builder = new MessageBuilder();
+
+        builder.append("Ok test");
+
+        ServiceManager.get(PollingService.class).ifPresent(poll -> builder.setActionRows(poll.createSelectionMenu(id)));
+
+        return builder.build();
     }
 
     private void addReactions(Message message) {
         Map<String, EmojiModel> emojis = Mist.get().getConfig().get().getAutoRole().getSelectReactions().get(message.getId());
-        if(emojis == null) return;
+        if (emojis == null) return;
 
-        for(Map.Entry<String, EmojiModel> entry : emojis.entrySet()) {
+        for (Map.Entry<String, EmojiModel> entry : emojis.entrySet()) {
             Emoji emoji = entry.getValue().to();
             System.out.println(emoji);
-            if(emoji.isUnicode()) {
+            if (emoji.isUnicode()) {
                 message.addReaction(emoji.getName()).queue();
             } else {
                 message.addReaction(String.format("%s:%s", emoji.getName(), emoji.getId())).queue();

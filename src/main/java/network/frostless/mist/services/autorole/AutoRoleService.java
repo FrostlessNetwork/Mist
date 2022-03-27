@@ -20,10 +20,9 @@ import network.frostless.mist.Mist;
 import network.frostless.mist.config.MistConfig;
 import network.frostless.mist.config.model.AutoRoleModel;
 import network.frostless.mist.config.model.SelectOptionModel;
-import network.frostless.mist.config.model.SelectReactionModel;
 import network.frostless.mist.core.service.impl.EventableService;
 import network.frostless.mist.services.autorole.model.ButtonModel;
-import network.frostless.mist.services.autorole.model.EmojiModel;
+import network.frostless.mist.config.model.common.EmojiModel;
 import org.spongepowered.configurate.ConfigurateException;
 
 import java.util.*;

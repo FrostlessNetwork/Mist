@@ -21,7 +21,7 @@ public class ServiceManager {
         return Lists.newArrayList(services.values());
     }
 
-    public void registerService(Service ...registeringServices) {
+    public void registerService(Service... registeringServices) {
         for (Service service : registeringServices) {
             services.put(service.getClass(), service);
         }
@@ -31,8 +31,12 @@ public class ServiceManager {
         return Optional.ofNullable(clazz.cast(services.get(clazz)));
     }
 
+    public static <T extends Service> Optional<T> get(Class<T> clazz) {
+        return instance.getService(clazz);
+    }
+
     public static ServiceManager get() {
-        if(instance == null) instance = new ServiceManager();
+        if (instance == null) instance = new ServiceManager();
 
         return instance;
     }

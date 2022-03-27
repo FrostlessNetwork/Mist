@@ -2,7 +2,7 @@ package network.frostless.mist.config.model;
 
 import lombok.Data;
 import network.frostless.mist.services.autorole.model.ButtonModel;
-import network.frostless.mist.services.autorole.model.EmojiModel;
+import network.frostless.mist.config.model.common.EmojiModel;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import java.util.ArrayList;

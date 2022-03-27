@@ -37,7 +37,7 @@ public class HelpCommand extends CommandBase {
 
         for (CommandBase command : service.getCommands().values()) {
 
-            if(command.getPermissionMapper().apply(null).size() != 0 && !Permissions.hasPermission(command, event.getUser())) continue;
+            if(command.getPermissionMapper().get().size() != 0 && !Permissions.hasPermission(command, event.getUser())) continue;
 
             builder
                     .append(":white_medium_small_square: ")

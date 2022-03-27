@@ -1,4 +1,4 @@
-package network.frostless.mist.config.model;
+package network.frostless.mist.config.model.polling;
 
 import lombok.Data;
 import network.frostless.mist.config.model.common.EmojiModel;
@@ -6,8 +6,11 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 @Data
 @ConfigSerializable
-public class SelectReactionModel {
+public class PollOption {
 
-    private String role;
-    private EmojiModel emojiModel;
+    private String description;
+
+    private EmojiModel emoji;
+
+    PollOption() { }
 }

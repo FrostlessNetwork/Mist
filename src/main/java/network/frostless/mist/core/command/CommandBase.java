@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class CommandBase {
@@ -37,8 +38,8 @@ public class CommandBase {
         }
     }
 
-    public Function<net.dv8tion.jda.api.interactions.commands.Command, List<CommandPrivilege>> getPermissionMapper() {
-        return (command) -> List.of();
+    public Supplier<List<CommandPrivilege>> getPermissionMapper() {
+        return List::of;
     }
 
     public List<SubcommandGroupData> getSubCommandGroups() {
@@ -144,6 +145,7 @@ public class CommandBase {
 
 
     public static boolean hasParameters(Method method) {
+        if(method == null) return false;
         return !getParameters(method).isEmpty();
     }
 

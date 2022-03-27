@@ -1,4 +1,4 @@
-package network.frostless.mist.services.autorole.model;
+package network.frostless.mist.config.model.common;
 
 import lombok.Data;
 import net.dv8tion.jda.api.entities.Emoji;

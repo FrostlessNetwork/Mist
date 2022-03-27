@@ -16,6 +16,7 @@ import network.frostless.mist.core.command.annotations.Param;
 
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static network.frostless.fragment.utils.SnowflakeUtils.parseChannelMessage;
 
@@ -45,7 +46,7 @@ public class EditMessageCommand extends CommandBase {
 
 
     @Override
-    public Function<net.dv8tion.jda.api.interactions.commands.Command, List<CommandPrivilege>> getPermissionMapper() {
-        return (cmd) -> List.of(CommandPrivilege.enableUser("201825529333153792"));
+    public Supplier<List<CommandPrivilege>> getPermissionMapper() {
+        return () -> List.of(CommandPrivilege.enableUser("201825529333153792"));
     }
 }
