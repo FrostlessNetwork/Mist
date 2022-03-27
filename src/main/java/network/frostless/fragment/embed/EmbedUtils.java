@@ -38,7 +38,6 @@ public class EmbedUtils {
             if (t != null) t.printStackTrace();
 
             MessageBuilder parse = EmbedUtils.parse(res.body());
-            System.out.println(parse);
             future.complete(parse);
         });
 
@@ -77,9 +76,9 @@ public class EmbedUtils {
             builder.setDescription(model.getDescription());
             builder.setColor(model.getColor());
 
-            if (model.getImage() != null && !model.getImage().getUrl().isEmpty())
+            if (model.getImage() != null && model.getImage().getUrl() != null && !model.getImage().getUrl().isEmpty())
                 builder.setImage(model.getImage().getUrl());
-            if (model.getThumbnail() != null && !model.getThumbnail().getUrl().isEmpty())
+            if (model.getThumbnail() != null && model.getThumbnail().getUrl() != null && !model.getThumbnail().getUrl().isEmpty())
                 builder.setThumbnail(model.getThumbnail().getUrl());
             if (model.getTimestamp() != null)
                 builder.setTimestamp(Instant.now());
