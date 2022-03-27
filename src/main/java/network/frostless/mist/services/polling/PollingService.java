@@ -1,18 +1,20 @@
 package network.frostless.mist.services.polling;
 
 import com.google.common.collect.Maps;
+import lombok.Getter;
+import lombok.SneakyThrows;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.interaction.SelectionMenuEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.selections.SelectionMenu;
-import network.frostless.mist.Mist;
-import network.frostless.mist.config.model.polling.PollModel;
-import network.frostless.mist.config.model.polling.PollingConfigModel;
-import network.frostless.mist.core.service.Service;
+import network.frostless.mist.Application;
+import network.frostless.mist.services.polling.config.PollingConfig;
+import network.frostless.mist.services.polling.config.model.PollModel;
 import network.frostless.mist.core.service.impl.EventableService;
 
+import java.nio.file.Path;
 import java.time.Instant;
 import java.util.*;
 
@@ -24,13 +26,23 @@ public class PollingService implements EventableService {
 
     private final Map<String, Map<String, List<String>>> pollCache = new HashMap<>();
 
+    @Getter
+    private final PollingConfig config;
+
+    @SneakyThrows
+    public PollingService() {
+        config = new PollingConfig();
+        config.setFilePath(Path.of(Application.configDirectory + "/polling.yml"));
+        config.load();
+    }
+
     @SubscribeEvent
     public void onSelect(SelectionMenuEvent event) {
         if (!event.getComponentId().startsWith(POLL_PREFIX)) return;
 
         String voteId = event.getComponentId().split(POLL_PREFIX)[1];
 
-        PollModel poll = getConfig().getList().get(voteId);
+        PollModel poll = config.get().getList().get(voteId);
 
         if (poll == null) {
             event.reply("This poll doesn't exist!").setEphemeral(true).queue();
@@ -57,7 +69,7 @@ public class PollingService implements EventableService {
 
         String pollId = event.getComponentId().split(POLL_PREFIX + "view-results-")[1];
 
-        Set<String> options = getConfig().getList().get(pollId).getOptions().keySet();
+        Set<String> options = config.get().getList().get(pollId).getOptions().keySet();
         Map<String, Integer> votesCounted = getVotesFor(pollId);
 
         EmbedBuilder builder = new EmbedBuilder();
@@ -76,11 +88,11 @@ public class PollingService implements EventableService {
     }
 
     public boolean exists(String pollId) {
-        return getConfig().getList().containsKey(pollId);
+        return config.get().getList().containsKey(pollId);
     }
 
     public ActionRow createSelectionMenu(String voteId) {
-        PollModel poll = getConfig().getList().get(voteId);
+        PollModel poll = config.get().getList().get(voteId);
         if (poll == null) return null;
 
         SelectionMenu.Builder builder = SelectionMenu.create(POLL_PREFIX + voteId);
@@ -111,7 +123,5 @@ public class PollingService implements EventableService {
         return votes;
     }
 
-    private PollingConfigModel getConfig() {
-        return Mist.get().getConfig().get().getVoting();
-    }
+
 }

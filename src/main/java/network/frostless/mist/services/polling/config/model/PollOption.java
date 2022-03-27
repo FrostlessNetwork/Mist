@@ -1,4 +1,4 @@
-package network.frostless.mist.config.model.polling;
+package network.frostless.mist.services.polling.config.model;
 
 import lombok.Data;
 import network.frostless.mist.config.model.common.EmojiModel;

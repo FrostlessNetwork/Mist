@@ -11,6 +11,7 @@ public class Application {
 
     public static MistConfig config;
 
+    public static Path configDirectory = Path.of("./");
 
     static {
         System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
@@ -19,13 +20,18 @@ public class Application {
     public static void main(String[] args) throws LoginException, InterruptedException, ConfigurateException {
         if(!System.getenv().containsKey("DISCORD_TOKEN")) throw new IllegalArgumentException("DISCORD_TOKEN environment variable is not set");
 
+        for (String arg : args) {
+            if(arg.startsWith("--config=")) {
+                configDirectory = Path.of(arg.substring(9));
+            }
+        }
+
         Application.config = new MistConfig();
 
-        config.setFilePath(Path.of("./config.yml"));
+        config.setFilePath(Path.of(configDirectory + "/config.yml"));
         config.load();
 
         Mist mist = new Mist();
-
         mist.start();
     }
 }

@@ -63,7 +63,6 @@ public class CommandService implements EventableService {
                 for (Parameter parameter : sc.getValue().getParameters()) {
                     if (parameter.isAnnotationPresent(Param.class)) {
                         Param annotation = parameter.getAnnotation(Param.class);
-                        System.out.println(annotation);
                         subcommandData.addOption(annotation.type(), annotation.name(), annotation.description(), annotation.required());
                     }
                 }

@@ -67,6 +67,6 @@ public class PollCommand extends CommandBase {
 
     @Override
     public Supplier<List<CommandPrivilege>> getPermissionMapper() {
-        return () -> Mist.get().getConfig().get().getVoting().getAdmins().stream().map(CommandPrivilege::enableUser).toList();
+        return () -> ServiceManager.get(PollingService.class).get().getConfig().get().getAdmins().stream().map(CommandPrivilege::enableUser).toList();
     }
 }

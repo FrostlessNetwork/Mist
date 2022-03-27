@@ -1,4 +1,4 @@
-package network.frostless.mist.config.model.polling;
+package network.frostless.mist.services.polling.config.model;
 
 import lombok.Data;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;

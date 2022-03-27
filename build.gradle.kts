@@ -1,5 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar as ShadowJar
-
+import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer
 
 plugins {
     java
@@ -34,6 +34,7 @@ dependencies {
     implementation("org.apache.logging.log4j:log4j-api:${log4jVersion}")
     implementation("org.apache.logging.log4j:log4j-core:${log4jVersion}")
     implementation("org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}")
+    implementation("org.apache.logging.log4j:log4j-to-slf4j:${log4jVersion}")
     implementation("org.apache.logging.log4j:log4j-iostreams:${log4jVersion}")
     implementation("org.apache.logging.log4j:log4j-jul:${log4jVersion}")
     implementation("net.minecrell:terminalconsoleappender:1.3.0")
@@ -68,7 +69,10 @@ dependencies {
 
 // Configure Shadow to output with normal jar file name:
 tasks.named<ShadowJar>("shadowJar").configure {
-    minimize()
+//    minimize()
+
+    // https://stackoverflow.com/questions/51918072/how-to-produce-a-fatjar-for-a-simple-console-application-with-gradle-kotlin-ds
+    transform(Log4j2PluginsCacheFileTransformer::class.java)
     archiveFileName.set("${project.rootProject.name}-${project.name}-v${project.version}.jar")
     destinationDirectory.set(file("$rootDir/output"))
 }
