@@ -159,6 +159,8 @@ public class AutoRoleService implements EventableService {
 
     @SubscribeEvent
     public void onUnReact(GuildMessageReactionRemoveEvent evt) {
+        if(evt.getUser() == null) return;
+
         if (evt.getUser().isBot()) return;
 
         if (evt.getMember() == null) return;
