@@ -10,6 +10,8 @@ public class MistConfigModel {
 
     private String guildId = "945581170157051914";
 
+    private String suggestionChannel = "956741310189043712";
+
     private AutoRoleModel autoRole = new AutoRoleModel();
 
     private RedisModel redis;
