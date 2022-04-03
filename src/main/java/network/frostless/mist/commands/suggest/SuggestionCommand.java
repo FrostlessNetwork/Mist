@@ -141,7 +141,15 @@ public class SuggestionCommand extends CommandBase {
                 embedBuilder.setColor(Color.GREEN);
                 cm.getRight().editMessageEmbeds(embedBuilder.build()).queue();
 
-                cm.getRight().replyEmbeds(generateConditionalEmbed(evt.getMember(), cm.getRight(), embed, SuggestionState.ACCEPTED, reason)).queue();
+                MessageEmbed embe = generateConditionalEmbed(evt.getMember(), cm.getRight(), embed, SuggestionState.ACCEPTED, reason);
+
+                String chan = Mist.get().getConfig().get().getSuggestionArchive();
+                GuildChannel channel = evt.getJDA().getGuildChannelById(chan);
+                if (channel instanceof TextChannel txtChan)
+                    txtChan.sendMessageEmbeds(embe).queue();
+
+
+                cm.getRight().replyEmbeds(embe).queue();
 
                 hook.editOriginal("Suggestion accepted!").queue();
             }
@@ -175,7 +183,14 @@ public class SuggestionCommand extends CommandBase {
                 embedBuilder.setColor(Color.RED);
                 cm.getRight().editMessageEmbeds(embedBuilder.build()).queue();
 
-                cm.getRight().replyEmbeds(generateConditionalEmbed(evt.getMember(), cm.getRight(), embed, SuggestionState.DECLINED, reason)).queue();
+                MessageEmbed e = generateConditionalEmbed(evt.getMember(), cm.getRight(), embed, SuggestionState.DECLINED, reason);
+                cm.getRight().replyEmbeds(e).queue();
+
+                String chan = Mist.get().getConfig().get().getSuggestionArchive();
+                GuildChannel channel = evt.getJDA().getGuildChannelById(chan);
+                if (channel instanceof TextChannel txtChan)
+                    txtChan.sendMessageEmbeds(e).queue();
+                hook.sendMessage("Suggestion rejected!").setEphemeral(true).queue();
             }
         }
     }

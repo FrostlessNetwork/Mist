@@ -19,4 +19,6 @@ public class MistConfigModel {
 
     private AdminModel suggestionAdmins = new AdminModel();
 
+    private String suggestionArchive = "945951848085483540";
+
 }
