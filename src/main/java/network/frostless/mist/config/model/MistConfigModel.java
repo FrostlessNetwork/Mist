@@ -2,6 +2,7 @@ package network.frostless.mist.config.model;
 
 
 import lombok.Data;
+import network.frostless.mist.config.model.common.AdminModel;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 @Data
@@ -15,5 +16,7 @@ public class MistConfigModel {
     private AutoRoleModel autoRole = new AutoRoleModel();
 
     private RedisModel redis;
+
+    private AdminModel suggestionAdmins = new AdminModel();
 
 }

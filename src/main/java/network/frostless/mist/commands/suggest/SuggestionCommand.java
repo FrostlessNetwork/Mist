@@ -3,9 +3,14 @@ package network.frostless.mist.commands.suggest;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.InteractionHook;
+import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
+import net.dv8tion.jda.internal.utils.tuple.Pair;
+import network.frostless.fragment.utils.SnowflakeUtils;
 import network.frostless.mist.Application;
+import network.frostless.mist.Mist;
 import network.frostless.mist.core.command.CommandBase;
 import network.frostless.mist.core.command.annotations.Command;
 import network.frostless.mist.core.command.annotations.Default;
@@ -15,7 +20,13 @@ import network.frostless.mist.core.command.annotations.SubCommand;
 import java.awt.*;
 import java.net.URL;
 import java.time.Instant;
+import java.util.*;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Command(value = "suggest", description = "Suggest a feature for Frostless Network!")
 public class SuggestionCommand extends CommandBase {
@@ -76,5 +87,147 @@ public class SuggestionCommand extends CommandBase {
             evt.getHook().sendMessage("Your suggestion has been created! Check out <#" + suggestionChannel + "> to see it!").setEphemeral(true).queue();
             cooldown.put(evt.getMember().getId(), System.currentTimeMillis());
         });
+    }
+
+    @SubCommand(value = "delete", description = "Deletes a suggestion")
+    public void delete(
+            SlashCommandEvent evt,
+            @Param(name = "channel-message-key", required = true, description = "The channel message key") String channelMessageKey
+    ) {
+        if (evt.getMember() == null) return;
+
+        if (!isAdmin(evt.getMember())) {
+            evt.getHook().sendMessage("You do not have permission to use this command!").setEphemeral(true).queue();
+            return;
+        }
+        evt.deferReply(true).queue();
+        InteractionHook hook = evt.getHook();
+
+        Pair<GuildChannel, Message> cm = SnowflakeUtils.parseChannelMessage(channelMessageKey);
+        if (cm == null || cm.getLeft() == null || cm.getRight() == null) {
+            hook.sendMessage("Invalid channel message key!").setEphemeral(true).queue();
+        } else {
+            cm.getRight().delete().queue();
+            hook.editOriginal("Suggestion deleted!").queue();
+        }
+    }
+
+    @SubCommand(value = "accept", description = "Accepts a suggestion")
+    public void accept(
+            SlashCommandEvent evt,
+            @Param(name = "channel-message-key", required = true, description = "The channel message key") String channelMessageKey,
+            @Param(name = "reason", description = "The reason for accepting the suggestion") String reason
+    ) {
+        if (evt.getMember() == null) return;
+
+        if (!isAdmin(evt.getMember())) {
+            evt.reply("You do not have permission to use this command!").setEphemeral(true).queue();
+            return;
+        }
+        evt.deferReply(true).queue();
+        InteractionHook hook = evt.getHook();
+
+        Pair<GuildChannel, Message> cm = SnowflakeUtils.parseChannelMessage(channelMessageKey);
+        if (cm == null || cm.getLeft() == null || cm.getRight() == null) {
+            hook.sendMessage("Invalid channel message key! You can get this by hovering over the suggestion while holding shift and pressing `Copy ID`").setEphemeral(true).queue();
+        } else {
+            List<MessageEmbed> embeds = cm.getRight().getEmbeds();
+            if (embeds.size() <= 0) {
+                hook.sendMessage("This message doesn't have an embed!").setEphemeral(true).queue();
+            } else {
+                MessageEmbed embed = embeds.get(0);
+                EmbedBuilder embedBuilder = new EmbedBuilder(embed);
+
+                embedBuilder.setColor(Color.GREEN);
+                cm.getRight().editMessageEmbeds(embedBuilder.build()).queue();
+
+                cm.getRight().replyEmbeds(generateConditionalEmbed(evt.getMember(), cm.getRight(), embed, SuggestionState.ACCEPTED, reason)).queue();
+
+                hook.editOriginal("Suggestion accepted!").queue();
+            }
+        }
+    }
+
+    @SubCommand("reject")
+    private void deny(SlashCommandEvent evt,
+                      @Param(name = "channel-message-key", required = true, description = "The channel message key") String channelMessageKey,
+                      @Param(name = "reason", required = true, description = "The reason to deny") String reason) {
+        if (evt.getMember() == null) return;
+
+        if (!isAdmin(evt.getMember())) {
+            evt.reply("You do not have permission to use this command!").setEphemeral(true).queue();
+            return;
+        }
+        evt.deferReply(true).queue();
+        InteractionHook hook = evt.getHook();
+
+        Pair<GuildChannel, Message> cm = SnowflakeUtils.parseChannelMessage(channelMessageKey);
+        if (cm == null || cm.getLeft() == null || cm.getRight() == null) {
+            hook.sendMessage("Invalid channel message key! You can get this by hovering over the suggestion while holding shift and pressing `Copy ID`").setEphemeral(true).queue();
+        } else {
+            List<MessageEmbed> embeds = cm.getRight().getEmbeds();
+            if (embeds.size() <= 0) {
+                hook.sendMessage("This message doesn't have an embed!").setEphemeral(true).queue();
+            } else {
+                MessageEmbed embed = embeds.get(0);
+                EmbedBuilder embedBuilder = new EmbedBuilder(embed);
+
+                embedBuilder.setColor(Color.RED);
+                cm.getRight().editMessageEmbeds(embedBuilder.build()).queue();
+
+                cm.getRight().replyEmbeds(generateConditionalEmbed(evt.getMember(), cm.getRight(), embed, SuggestionState.DECLINED, reason)).queue();
+            }
+        }
+    }
+
+    private MessageEmbed generateConditionalEmbed(Member member, Message original, MessageEmbed embed, SuggestionState state, String reason) {
+        EmbedBuilder embedBuilder = new EmbedBuilder(embed);
+
+        if (embed.getDescription() == null) return embed;
+
+        embedBuilder.setColor(state == SuggestionState.ACCEPTED ? Color.GREEN : Color.RED);
+        embedBuilder.setTitle(state == SuggestionState.ACCEPTED ? "Suggestion accepted!" : "Suggestion rejected!");
+
+        Pattern suggestPattern = Pattern.compile("Suggestion from \\*\\*(<@\\d{18}>)\\*\\*");
+
+        Matcher matcher = suggestPattern.matcher(embed.getDescription());
+
+        if (matcher.find()) {
+            String suggestor = matcher.group(1);
+            embedBuilder
+                    .setDescription(embed.getDescription()
+                            .replaceFirst(suggestPattern.pattern(), String.format("The suggestion from %s has been **%s** by %s:", suggestor, state == SuggestionState.ACCEPTED ? "accepted" : "denied", member.getAsMention()))
+                            .replaceAll("Please vote with ✅ or ❌", "")
+                    );
+
+        }
+
+        original.getReactions();
+
+        Map<String, Integer> reactionCounts = new HashMap<>();
+        original.getReactions().forEach(r -> reactionCounts.put(r.getReactionEmote().getEmoji(), r.getCount()));
+
+        if (reason != null) {
+            embedBuilder.addField("Reason", reason, false);
+        }
+
+        embedBuilder.addField("Upvotes", String.valueOf(reactionCounts.get("✅") - 1), true);
+        embedBuilder.addField("Downvotes", String.valueOf(reactionCounts.get("❌") - 1), true);
+
+        original.clearReactions().queue();
+
+
+        return embedBuilder.build();
+    }
+
+
+    private boolean isAdmin(Member member) {
+        return Mist.get().getConfig().get().getSuggestionAdmins().exact(member);
+    }
+
+    enum SuggestionState {
+        NEW,
+        ACCEPTED,
+        DECLINED
     }
 }
