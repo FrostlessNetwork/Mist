@@ -12,6 +12,7 @@ import network.frostless.mist.core.command.annotations.Default;
 import network.frostless.serverapi.RedisKeys;
 
 import java.time.Instant;
+import java.util.Map;
 
 @Command(value = "playercount", description = "Shows the current player count")
 public class PlayerCountCommand extends CommandBase {
@@ -29,9 +30,15 @@ public class PlayerCountCommand extends CommandBase {
         Interaction interaction = event.getInteraction();
         interaction.deferReply().queue();
 
-        String totalPlayers = redis.sync().get(RedisKeys.TOTAL_PLAYERS);
+        Map<String, String> playerCounts = redis.sync().hgetall(RedisKeys.H_PROXY_PLAYER_COUNT);
 
-        int players = totalPlayers != null ? Integer.parseInt(totalPlayers) : 0;
+        int players;
+
+        try {
+            players = playerCounts.values().stream().map(Integer::parseInt).reduce(0, Integer::sum);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         EmbedBuilder embed = new EmbedBuilder();
 
