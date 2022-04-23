@@ -25,6 +25,7 @@ import network.frostless.mist.commands.game.tictactoe.TicTacToeCommand;
 import network.frostless.mist.commands.game.tictactoe.core.TicTacToeManager;
 import network.frostless.mist.commands.server.PlayerCountCommand;
 import network.frostless.mist.commands.server.ServerIPCommand;
+import network.frostless.mist.commands.server.VoteSiteCommand;
 import network.frostless.mist.commands.server.link.LinkCommand;
 import network.frostless.mist.commands.suggest.SuggestionCommand;
 import network.frostless.mist.commands.voting.PollCommand;
@@ -101,7 +102,8 @@ public class Mist extends DiscordBot {
                 new SuggestionCommand(),
                 // Games
                 new TicTacToeCommand(),
-                new PollCommand()
+                new PollCommand(),
+                new VoteSiteCommand()
         );
     }
 
