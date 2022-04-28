@@ -25,5 +25,7 @@ public class VoteSiteCommand extends CommandBase {
                 - [Website 5](https://minecraft-mp.com/server-s302904)
                 - [Website 6](https://minecraft-server-list.com/server/487047/)
                 """);
+
+        event.replyEmbeds(embed.build()).queue();
     }
 }
